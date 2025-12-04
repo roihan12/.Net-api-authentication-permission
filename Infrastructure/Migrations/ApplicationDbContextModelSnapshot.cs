@@ -100,7 +100,7 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Descriptions")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Grup")
+                    b.Property<string>("Group")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RoleId")

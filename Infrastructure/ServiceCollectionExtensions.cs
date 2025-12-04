@@ -10,7 +10,7 @@ namespace Infrastructure
     {
         public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration) {
 
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))).AddTransient<ApplicationDbSeeder>();
             return services;
         }
     }

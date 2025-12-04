@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251201165945_InitialDB_1")]
-    partial class InitialDB_1
+    [Migration("20251203191518_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -103,7 +103,7 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Descriptions")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Grup")
+                    b.Property<string>("Group")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RoleId")
