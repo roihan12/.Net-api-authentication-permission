@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using System.Net;
 using System.Reflection;
@@ -64,7 +65,7 @@ namespace WebApi
                 bearer.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     RoleClaimType = ClaimTypes.Role,
@@ -130,6 +131,56 @@ namespace WebApi
                 }
             });
             return services;
+        }
+
+        internal static AppConfiguration getApplicationSettings(this IServiceCollection services, IConfiguration configuration)
+        {
+            var applicationSettingsConfiguration = configuration.GetSection(nameof(AppConfiguration));
+            services.Configure<AppConfiguration>(applicationSettingsConfiguration);
+            return applicationSettingsConfiguration.Get<AppConfiguration>();
+        }
+
+        internal static void RegisterSwagger(this IServiceCollection services)
+        {
+            services.AddSwaggerGen(c =>
+            {
+                c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    Description = "Input your Bearer token in this format Bearer {token} to access this api"
+                });
+                c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id ="Bearer",
+                            },
+                            Scheme = "Bearer",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+                        }, new List<String>()
+                    },
+                });
+
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "Auth and authorization api example",
+                    License = new OpenApiLicense
+                    {
+                        Name = "MIT License"
+                    }
+
+                });
+            });
         }
 
     }

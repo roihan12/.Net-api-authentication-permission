@@ -1,3 +1,4 @@
+using Application;
 using Infrastructure;
 using WebApi;
 
@@ -9,10 +10,15 @@ builder.Services.AddControllers();
 
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddIdentitySettings();
+builder.Services.AddApplicationServices();
+builder.Services.AddJwtAuthentication(builder.Services.getApplicationSettings(builder.Configuration));
+builder.Services.AddIdentityServices();
+builder.Services.AddEmployeeService();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.RegisterSwagger();
+
 
 var app = builder.Build();
 

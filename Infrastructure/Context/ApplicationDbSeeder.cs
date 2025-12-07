@@ -31,8 +31,13 @@ namespace Infrastructure.Context
             // Seed roles
             await SeedRolesAsync();
 
+            // Seed basicUser
+            await SeedUserBasicAsync();
+
             // Seed user(Admin)
             await SeedUserAdminAsync();
+
+
 
 
 
@@ -82,6 +87,39 @@ namespace Infrastructure.Context
             if (!await _userManager.IsInRoleAsync(adminUser, AppRoles.Basic) && !await _userManager.IsInRoleAsync(adminUser, AppRoles.Admin))
             {
                 await _userManager.AddToRolesAsync(adminUser, AppRoles.DefaultRoles);
+            }
+
+        }
+
+
+        private async Task SeedUserBasicAsync()
+        {
+         
+
+            var basicUser = new ApplicationUser
+            {
+                FirstName = "Basic",
+                LastName = "User",
+                UserName = "basicuser",
+                Email = "basicuser@gmail.com",
+                EmailConfirmed = true,
+                PhoneNumberConfirmed = true,
+                IsActive = true,
+                NormalizedEmail = "BASICUSER@GMAIL.COM",
+                NormalizedUserName = "BASICUSER"
+
+            };
+
+            if (!await _userManager.Users.AnyAsync(u => u.Email == "basicuser@gmail.com"))
+            {
+                var password = new PasswordHasher<ApplicationUser>();
+                basicUser.PasswordHash = password.HashPassword(basicUser, AppCredentials.Password);
+                await _userManager.CreateAsync(basicUser);
+            }
+
+            if (!await _userManager.IsInRoleAsync(basicUser, AppRoles.Basic))
+            {
+                await _userManager.AddToRoleAsync(basicUser, AppRoles.Basic);
             }
 
         }
