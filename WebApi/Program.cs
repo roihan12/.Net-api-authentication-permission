@@ -14,6 +14,7 @@ builder.Services.AddApplicationServices();
 builder.Services.AddJwtAuthentication(builder.Services.getApplicationSettings(builder.Configuration));
 builder.Services.AddIdentityServices();
 builder.Services.AddEmployeeService();
+builder.Services.AddInfrastructureDependencies();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

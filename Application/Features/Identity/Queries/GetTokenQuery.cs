@@ -1,7 +1,7 @@
 ﻿
 
 using Application.Services.Identity;
-using Common.Request;
+using Common.Request.Identity;
 using Common.Responses.Wrappers;
 using MediatR;
 

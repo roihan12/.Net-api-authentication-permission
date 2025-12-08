@@ -1,6 +1,6 @@
 ﻿using Application.AppConfigs;
 using Application.Services.Identity;
-using Common.Request;
+using Common.Request.Identity;
 using Common.Responses;
 using Common.Responses.Wrappers;
 using Infrastructure.Models;

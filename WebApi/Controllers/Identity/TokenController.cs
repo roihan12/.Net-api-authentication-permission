@@ -1,5 +1,5 @@
 ﻿using Application.Features.Idenity.Queries;
-using Common.Request;
+using Common.Request.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
