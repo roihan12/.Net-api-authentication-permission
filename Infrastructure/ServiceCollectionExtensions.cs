@@ -23,7 +23,10 @@ namespace Infrastructure
         public static IServiceCollection AddIdentityServices(this IServiceCollection services)
         {
             services.AddTransient<ITokenService, TokenService>()
-                .AddTransient<IUserService, UserService>();
+                .AddTransient<IUserService, UserService>()
+                .AddHttpContextAccessor()
+                .AddScoped<ICurrentUserService, CurrentUserService>();
+
             return services;
         }
 

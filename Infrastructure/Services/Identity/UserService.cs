@@ -14,13 +14,15 @@ namespace Infrastructure.Services.Identity
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IMapper _mapper;
 
-        public UserService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IMapper mapper)
+        public UserService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IMapper mapper, ICurrentUserService currentUserService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
 
@@ -153,5 +155,111 @@ namespace Infrastructure.Services.Identity
             }
             return errorsDescriptions;
         }
+
+        public async Task<IResponseWrapper> GetRolesAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return await ResponseWrapper.FailAsync("User not found.");
+
+            var allRoles = await _roleManager.Roles.ToListAsync();
+            var userRoles = await _userManager.GetRolesAsync(user); // semua role user
+
+            var result = allRoles.Select(role => new UserRoleViewModel
+            {
+                RoleName = role.Name,
+                RoleDescription = role.Desciption,
+                IsAssignedToUser = userRoles.Contains(role.Name)
+            }).ToList();
+
+            return await ResponseWrapper<List<UserRoleViewModel>>.SuccessAsync(result);
+        }
+
+        public async Task<IResponseWrapper> UpdateUserRolesAsync(UpdateUserRolesRequest updateUserRolesRequest)
+        {
+            // Cannot un-assign administrator 
+            // Default admin user seeded by application cannot be unassigned be assgned/un-assigned the administrator role
+            // to ensure there is always at least one user with administrator role in the system.
+
+            var userInDb = await _userManager.FindByIdAsync(updateUserRolesRequest.UserId);
+
+            if (userInDb is not null)
+            {
+                if (userInDb.Email == AppCredentials.Email)
+                {
+                    return await ResponseWrapper.FailAsync("User Roles update not permitted.");
+                }
+                var roles = await _userManager.GetRolesAsync(userInDb);
+                var rolesToBeAssigned = updateUserRolesRequest.Roles.Where(r => r.IsAssignedToUser == true).ToList();
+
+                var currentLoggedInUser = await _userManager.FindByIdAsync(_currentUserService.UserId);
+                if (currentLoggedInUser is null)
+                {
+                    return await ResponseWrapper.FailAsync("User not found.");
+                }
+
+                if (await _userManager.IsInRoleAsync(currentLoggedInUser, AppRoles.Admin))
+                {
+                    // Admin can update all roles
+                    var identityResult = await _userManager.RemoveFromRolesAsync(userInDb, roles);
+                    if (identityResult.Succeeded)
+                    {
+                        var newIdentityResult = await _userManager.AddToRolesAsync(userInDb, rolesToBeAssigned.Select(r => r.RoleName));
+                        if (newIdentityResult.Succeeded)
+                        {
+                            return await ResponseWrapper<string>.SuccessAsync("User roles updated successfully.");
+                        }
+                        return await ResponseWrapper.FailAsync(GetIdentityResultErrorDescription(newIdentityResult));
+                    }
+
+                    return await ResponseWrapper.FailAsync(GetIdentityResultErrorDescription(identityResult));
+                }
+
+                // Non-admin users cannot assign/un-assign administrator role
+                return await ResponseWrapper.FailAsync("User Roles update not permitted.");
+
+            }
+
+            return await ResponseWrapper.FailAsync("User not found.");
+
+        }
+
+
+        //public async Task<IResponseWrapper> GetRolesAsync(string userId)
+        //{
+        //    var userRolesVm = new List<UserRoleViewModel>();
+
+        //    var userIdDb = await _userManager.FindByIdAsync(userId);
+        //    if (userIdDb is not null)
+        //    {
+        //        //Get Roles
+        //        var allRoles = await _roleManager.Roles.ToListAsync();
+        //        foreach (var role in allRoles)
+        //        {
+        //            var userRoleVm = new UserRoleViewModel
+        //            {
+        //                RoleName = role.Name,
+        //                RoleDescription = role.Desciption
+        //            };
+
+        //            if (await _userManager.IsInRoleAsync(userIdDb, role.Name))
+        //            {
+        //                //user is assigned this role
+
+        //                userRoleVm.IsAssignedToUser = true;
+        //            }
+        //            else
+        //            {
+        //                userRoleVm.IsAssignedToUser = false;
+        //            }
+
+        //            userRolesVm.Add(userRoleVm);
+        //        }
+
+        //        return await ResponseWrapper<List<UserRoleViewModel>>.SuccessAsync(userRolesVm);
+
+        //    }
+        //    return await ResponseWrapper.FailAsync("User not found.");
+        //}
     }
 }
