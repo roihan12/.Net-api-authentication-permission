@@ -4,7 +4,7 @@ using Common.Responses.Wrappers;
 using MediatR;
 
 
-namespace Application.Features.Idenity.Queries
+namespace Application.Features.Identity.Token.Queries
 {
     public class GetRefreshTokenQuery : IRequest<IResponseWrapper>
     {

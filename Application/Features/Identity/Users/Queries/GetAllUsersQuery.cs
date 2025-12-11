@@ -2,7 +2,7 @@
 using Common.Responses.Wrappers;
 using MediatR;
 
-namespace Application.Features.Identity.Queries
+namespace Application.Features.Identity.Users.Queries
 {
     public class GetAllUsersQuery : IRequest<IResponseWrapper>
     {

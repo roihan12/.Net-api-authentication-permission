@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 
 namespace Common.Authorization
 {
-    public record  AppPermission(string Feature, string Action, string Group, string Description, bool IsBasic = false)
+    public record AppPermission(string Feature, string Action, string Group, string Description, bool IsBasic = false)
     {
-        public string Name =>  NameFor(Feature, Action);
+        public string Name => NameFor(Feature, Action);
 
         public static string NameFor(string feature, string action)
         {
@@ -50,5 +45,6 @@ namespace Common.Authorization
 
         public static IReadOnlyList<AppPermission> BasicPermissions { get; } = new ReadOnlyCollection<AppPermission>(_all.Where(ap => ap.IsBasic).ToArray());
 
+        public static IReadOnlyList<AppPermission> AllPermissions { get; } = new ReadOnlyCollection<AppPermission>(_all);
     }
 }

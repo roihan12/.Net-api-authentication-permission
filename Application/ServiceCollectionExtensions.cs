@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Application.Pipelines;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -12,7 +13,9 @@ namespace Application
 
             services
                 .AddMediatR(assembly)
-                .AddAutoMapper(assembly);
+                .AddAutoMapper(assembly)
+                .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehaviour<,>));
+
 
             return services;
         }

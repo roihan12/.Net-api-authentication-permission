@@ -22,9 +22,9 @@ namespace WebApi
         internal static IApplicationBuilder SeedDatabase(this IApplicationBuilder app)
         {
             using var ServicesScope = app.ApplicationServices.CreateScope();
-            
+
             var seeders = ServicesScope.ServiceProvider.GetServices<ApplicationDbSeeder>();
-            
+
             foreach (var seeder in seeders)
             {
                 seeder.SeedDatabaseAsync().GetAwaiter().GetResult();
@@ -53,7 +53,7 @@ namespace WebApi
 
         internal static IServiceCollection AddJwtAuthentication(this IServiceCollection services, AppConfiguration config)
         {
-           var key = Encoding.ASCII.GetBytes(config.Secret);
+            var key = Encoding.ASCII.GetBytes(config.Secret);
             services.AddAuthentication(authentication =>
             {
                 authentication.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -76,21 +76,87 @@ namespace WebApi
                 {
                     OnAuthenticationFailed = context =>
                     {
+                        context.Response.ContentType = "application/json";
+
+                        // 1. Token Expired
                         if (context.Exception is SecurityTokenExpiredException)
                         {
                             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                            context.Response.ContentType = "application/json";
-                            var result = JsonConvert.SerializeObject(ResponseWrapper.Fail("The Token is expired."));
-                            return context.Response.WriteAsync(result);
-                        }
-                        else
-                        {
-                            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                            context.Response.ContentType = "application/json";
-                            var result = JsonConvert.SerializeObject(ResponseWrapper.Fail("An unhandled error has occured."));
+                            var result = JsonConvert.SerializeObject(
+                                ResponseWrapper.Fail("The token is expired.")
+                            );
                             return context.Response.WriteAsync(result);
                         }
 
+                        // 2. Signature Invalid
+                        else if (context.Exception is SecurityTokenInvalidSignatureException)
+                        {
+                            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                            var result = JsonConvert.SerializeObject(
+                                ResponseWrapper.Fail("Invalid token signature.")
+                            );
+                            return context.Response.WriteAsync(result);
+                        }
+
+                        // 3. Issuer Salah
+                        else if (context.Exception is SecurityTokenInvalidIssuerException)
+                        {
+                            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                            var result = JsonConvert.SerializeObject(
+                                ResponseWrapper.Fail("Invalid token issuer.")
+                            );
+                            return context.Response.WriteAsync(result);
+                        }
+
+                        // 4. Audience Salah
+                        else if (context.Exception is SecurityTokenInvalidAudienceException)
+                        {
+                            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                            var result = JsonConvert.SerializeObject(
+                                ResponseWrapper.Fail("Invalid token audience.")
+                            );
+                            return context.Response.WriteAsync(result);
+                        }
+
+                        // 5. Lifetime Error
+                        else if (context.Exception is SecurityTokenInvalidLifetimeException)
+                        {
+                            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                            var result = JsonConvert.SerializeObject(
+                                ResponseWrapper.Fail("Invalid token lifetime.")
+                            );
+                            return context.Response.WriteAsync(result);
+                        }
+
+                        // 6. Token tanpa expired
+                        else if (context.Exception is SecurityTokenNoExpirationException)
+                        {
+                            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                            var result = JsonConvert.SerializeObject(
+                                ResponseWrapper.Fail("Token has no expiration.")
+                            );
+                            return context.Response.WriteAsync(result);
+                        }
+
+                        // 7. General JWT error
+                        else if (context.Exception is SecurityTokenException)
+                        {
+                            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                            var result = JsonConvert.SerializeObject(
+                                ResponseWrapper.Fail("Invalid token.")
+                            );
+                            return context.Response.WriteAsync(result);
+                        }
+
+                        // 8. Unknown error
+                        else
+                        {
+                            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                            var result = JsonConvert.SerializeObject(
+                                ResponseWrapper.Fail("An unhandled error has occurred.")
+                            );
+                            return context.Response.WriteAsync(result);
+                        }
                     },
                     OnChallenge = context =>
                     {

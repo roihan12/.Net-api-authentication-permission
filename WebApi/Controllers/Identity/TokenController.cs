@@ -1,7 +1,6 @@
-﻿using Application.Features.Idenity.Queries;
+﻿using Application.Features.Identity.Token.Queries;
 using Common.Request.Identity;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers.Identity
@@ -13,12 +12,12 @@ namespace WebApi.Controllers.Identity
         [AllowAnonymous]
         public async Task<IActionResult> GetTokenAsync([FromBody] TokenRequest tokenRequest)
         {
-           var response = await MediatorSender.Send(new GetTokenQuery { TokenRequest = tokenRequest});
+            var response = await MediatorSender.Send(new GetTokenQuery { TokenRequest = tokenRequest });
             if (response.IsSuccessful)
-           {
-               return Ok(response);
-           }
-           return BadRequest(response);
+            {
+                return Ok(response);
+            }
+            return BadRequest(response);
         }
 
 

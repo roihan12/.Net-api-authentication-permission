@@ -1,5 +1,5 @@
-﻿using Application.Features.Identity.Commands;
-using Application.Features.Identity.Queries;
+﻿using Application.Features.Identity.Users.Commands;
+using Application.Features.Identity.Users.Queries;
 using Common.Authorization;
 using Common.Request.Identity;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +9,7 @@ using WebApi.Attributes;
 namespace WebApi.Controllers.Identity
 {
     [Route("api/[controller]")]
-    public class UserController : MyBaseController<UserController>
+    public class UsersController : MyBaseController<UsersController>
     {
         [HttpPost]
         [AllowAnonymous]

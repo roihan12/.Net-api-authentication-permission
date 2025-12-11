@@ -3,7 +3,7 @@ using Common.Request.Identity;
 using Common.Responses.Wrappers;
 using MediatR;
 
-namespace Application.Features.Identity.Commands
+namespace Application.Features.Identity.Users.Commands
 {
     public class UpdateUserRolesCommand : IRequest<IResponseWrapper>
     {

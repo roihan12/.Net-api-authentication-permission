@@ -1,19 +1,14 @@
-﻿using Application.Services.Employees;
+﻿using Application.Pipelines;
+using Application.Services.Employees;
 using AutoMapper;
 using Common.Request.Employees;
 using Common.Responses.Employees;
 using Common.Responses.Wrappers;
-using Domain;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Features.Employees.Commands
 {
-    public class UpdateEmployeeCommand: IRequest<IResponseWrapper>
+    public class UpdateEmployeeCommand : IRequest<IResponseWrapper>, IValidateMe
     {
         public UpdateEmployeeRequest UpdateEmployeeRequest { get; set; }
     }
@@ -31,9 +26,9 @@ namespace Application.Features.Employees.Commands
 
         public async Task<IResponseWrapper> Handle(UpdateEmployeeCommand request, CancellationToken cancellationToken)
         {
-           var employeeInDb = await _employeeService.GetEmployeeByIdAsync(request.UpdateEmployeeRequest.Id);
-           if (employeeInDb is not null)
-           {
+            var employeeInDb = await _employeeService.GetEmployeeByIdAsync(request.UpdateEmployeeRequest.Id);
+            if (employeeInDb is not null)
+            {
                 employeeInDb.FirstName = request.UpdateEmployeeRequest.FirstName;
                 employeeInDb.LastName = request.UpdateEmployeeRequest.LastName;
                 employeeInDb.Email = request.UpdateEmployeeRequest.Email;
@@ -44,7 +39,7 @@ namespace Application.Features.Employees.Commands
                 return await ResponseWrapper<EmployeeResponse>.SuccessAsync(mappedEmployee, "Employee updated successfully.");
             }
 
-           return await ResponseWrapper.FailAsync("Employee not found.");
+            return await ResponseWrapper.FailAsync("Employee not found.");
 
         }
     }

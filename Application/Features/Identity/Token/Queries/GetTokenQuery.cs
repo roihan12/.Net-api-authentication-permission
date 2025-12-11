@@ -1,13 +1,11 @@
-﻿
-
-using Application.Services.Identity;
+﻿using Application.Services.Identity;
 using Common.Request.Identity;
 using Common.Responses.Wrappers;
 using MediatR;
 
-namespace Application.Features.Idenity.Queries
+namespace Application.Features.Identity.Token.Queries
 {
-    public class GetTokenQuery :IRequest<IResponseWrapper>
+    public class GetTokenQuery : IRequest<IResponseWrapper>
     {
         public TokenRequest TokenRequest { get; set; }
     }
@@ -24,7 +22,7 @@ namespace Application.Features.Idenity.Queries
 
         public async Task<IResponseWrapper> Handle(GetTokenQuery request, CancellationToken cancellationToken)
         {
-           return await _tokenService.GetTokenAsync(request.TokenRequest);
+            return await _tokenService.GetTokenAsync(request.TokenRequest);
         }
 
     }
