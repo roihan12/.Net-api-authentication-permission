@@ -1,5 +1,5 @@
 ﻿using Application.Exceptions;
-using Common.Responses;
+using Common.Responses.Wrappers;
 using System.Net;
 using System.Text.Json;
 
@@ -23,21 +23,20 @@ namespace WebApi.Middllewares
                 var response = context.Response;
                 response.ContentType = "application/json";
 
-                Error error = new();
+                //Error error = new();
+                var responseWrapper = await ResponseWrapper.FailAsync(ex.Message);
+
                 switch (ex)
                 {
                     case CustomValidationException vex:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
-                        error.FriendlyErrorMessage = vex.FriendlyErrorMessage;
-                        error.ErrorMessages = vex.ErrorMessages;
                         break;
                     default:
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        error.FriendlyErrorMessage = ex.Message;
                         break;
                 }
 
-                var result = JsonSerializer.Serialize(error);
+                var result = JsonSerializer.Serialize(responseWrapper);
                 await response.WriteAsync(result);
             }
         }

@@ -1,4 +1,4 @@
-﻿using Application.Exceptions;
+﻿using Common.Responses.Wrappers;
 using FluentValidation;
 using MediatR;
 
@@ -19,18 +19,24 @@ namespace Application.Pipelines
             if (_validators.Any())
             {
                 var context = new ValidationContext<TRequest>(request);
-                List<string> errors = new();
                 var validationResults = await Task.WhenAll(_validators.Select(v => v.ValidateAsync(context, cancellationToken)));
 
-                var failures = validationResults.SelectMany(r => r.Errors).Where(f => f != null).ToList();
-
-                foreach (var failure in failures)
+                if (!validationResults.Any(vr => vr.IsValid))
                 {
-                    errors.Add(failure.ErrorMessage);
+                    List<string> errors = new();
+
+
+                    var failures = validationResults.SelectMany(r => r.Errors).Where(f => f != null).ToList();
+
+                    foreach (var failure in failures)
+                    {
+                        errors.Add(failure.ErrorMessage);
+                    }
+
+                    return (TResponse)await ResponseWrapper.FailAsync(errors);
+
+                    //throw new CustomValidationException(errors, "One or more validation failure(s) occured");
                 }
-
-                throw new CustomValidationException(errors, "One or more validation failure(s) occured");
-
             }
 
             return await next();

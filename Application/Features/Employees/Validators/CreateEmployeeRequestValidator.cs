@@ -1,21 +1,14 @@
-﻿using Application.Services.Employees;
-using Common.Request.Employees;
-using Domain;
+﻿using Common.Request.Employees;
 using FluentValidation;
 
 namespace Application.Features.Employees.Validators
 {
-    internal class UpdateEmployeeRequestValidator : AbstractValidator<UpdateEmployeeRequest>
+    public class CreateEmployeeRequestValidator : AbstractValidator<CreateEmployeeRequest>
     {
-        public UpdateEmployeeRequestValidator(IEmployeeService employeeService)
+        public CreateEmployeeRequestValidator()
         {
-            RuleFor(request => request.Id)
-                .NotEmpty().WithMessage("Employee ID is required.")
-                .MustAsync(async (id, cancellation) =>
-                {
-                    return await employeeService.GetEmployeeByIdAsync(id) is Employee employeeInDb && employeeInDb.Id == id;
 
-                }).WithMessage("Employee with the specified ID does not exist.");
+
             RuleFor(request => request.FirstName)
                 .NotEmpty().WithMessage("First name is required.")
                 .MaximumLength(50).WithMessage("First name must not exceed 50 characters.");
@@ -24,8 +17,9 @@ namespace Application.Features.Employees.Validators
                 .NotEmpty().WithMessage("Last name is required.")
                 .MaximumLength(50).WithMessage("Last name must not exceed 50 characters.");
 
-            RuleFor(request => request.Email).NotEmpty()
-                .WithMessage("Email is required.").MaximumLength(100)
+            RuleFor(request => request.Email)
+                .NotEmpty().WithMessage("Email is required.")
+                .MaximumLength(100)
                 .EmailAddress().WithMessage("A valid email is required.");
 
             RuleFor(request => request.Salary)

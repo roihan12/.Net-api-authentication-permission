@@ -224,6 +224,17 @@ namespace Infrastructure.Services.Identity
 
         }
 
+        public async Task<IResponseWrapper<UserResponse>> GetUserByEmailAsync(string email)
+        {
+            var userInDb = await _userManager.FindByEmailAsync(email);
+            if (userInDb is null)
+                return await ResponseWrapper<UserResponse>.FailAsync("User not found.");
+
+            var mappedUser = _mapper.Map<UserResponse>(userInDb);
+
+            return await ResponseWrapper<UserResponse>.SuccessAsync(mappedUser);
+        }
+
 
         //public async Task<IResponseWrapper> GetRolesAsync(string userId)
         //{
