@@ -23,7 +23,6 @@ namespace WebApi.Middllewares
                 var response = context.Response;
                 response.ContentType = "application/json";
 
-                //Error error = new();
                 var responseWrapper = await ResponseWrapper.FailAsync(ex.Message);
 
                 switch (ex)
